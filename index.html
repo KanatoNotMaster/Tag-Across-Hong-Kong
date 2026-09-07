@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curse Cards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #09090b; /* Dark background */
+            color: #f4f4f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 480px; /* Mobile width */
+            background-color: #18181b; /* Dark container */
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Typography matching the card screenshot */
+        .card-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 1.5rem;
+            color: #000000;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+        }
+
+        .card-description {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            font-size: 0.975rem;
+            color: #1f2937;
+            line-height: 1.55;
+            margin-bottom: 2rem;
+            white-space: pre-line;
+        }
+
+        .card-reward {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 1.125rem;
+            color: #000000;
+        }
+
+        body, html {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #list-view {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            background-color: #18181b;
+        }
+        
+        #scrollable-content {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding: 1rem;
+            padding-bottom: 5rem;
+        }
+
+        /* Custom scrollbar for dark theme */
+        #scrollable-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        #scrollable-content::-webkit-scrollbar-track {
+            background: #18181b;
+        }
+        #scrollable-content::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app-container">
+
+        <!-- View 1: List of Curses -->
+        <div id="list-view" class="h-full flex flex-col bg-zinc-900">
+            <!-- Sticky Header Area -->
+            <div class="px-4 pt-4 pb-3 shadow-md z-10 bg-zinc-900 border-b border-zinc-800">
+                <h1 class="text-2xl font-black text-center mb-4 mt-2 font-[Montserrat] text-white tracking-wide">CURSE CARDS</h1>
+                
+                <div class="mb-1">
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="Search curses..." 
+                               class="w-full px-4 py-3 bg-zinc-800 text-white placeholder-zinc-400 border border-zinc-700 rounded-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent transition-all pl-10 text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-zinc-400 absolute left-3 top-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scrollable Button Area -->
+            <div id="scrollable-content">
+                <div id="button-list" class="flex flex-col gap-2.5">
+                    <!-- Buttons will be injected here by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Confirmation Modal (Overlay) -->
+        <div id="confirm-modal" class="hidden absolute inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+            <div class="bg-zinc-900 border border-zinc-700 rounded-2xl p-6 max-w-xs w-full text-center shadow-2xl">
+                <div class="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-4 border border-zinc-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-base font-semibold text-zinc-100 mb-6 leading-relaxed" id="confirm-message">Confirm you have pulled the curse?</h3>
+                <div class="flex justify-center gap-3">
+                    <button id="btn-cancel" class="px-4 py-2.5 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 rounded-xl font-medium transition-colors w-1/2 border border-zinc-700 text-sm">Cancel</button>
+                    <button id="btn-confirm" class="px-4 py-2.5 bg-white text-black hover:bg-zinc-200 rounded-xl font-bold transition-colors w-1/2 text-sm shadow-md">Confirm</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 2: The Card Overlay (Covers everything underneath) -->
+        <div id="card-view" class="hidden absolute inset-0 bg-zinc-950 z-40 flex flex-col items-center justify-between p-6 overflow-y-auto">
+            
+            <!-- Top bar with Back Button -->
+            <div class="w-full max-w-[340px] flex justify-between items-center mb-4">
+                <button id="btn-back" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-700 transition-all text-sm font-medium border border-zinc-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to List
+                </button>
+            </div>
+
+            <!-- The White Card with Dark Border -->
+            <div class="w-full max-w-[340px] my-auto bg-white border-4 border-black rounded-2xl p-7 shadow-2xl text-left flex flex-col justify-between min-h-[460px]">
+                <div>
+                    <div id="card-content-title" class="card-title">TITLE HERE</div>
+                    <div id="card-content-desc" class="card-description">Description goes here...</div>
+                </div>
+                <div id="card-content-reward" class="card-reward pt-4 border-t border-gray-200">REWARD: 0</div>
+            </div>
+
+            <div class="w-full max-w-[340px] h-4"></div>
+        </div>
+
+    </div>
+
+    <script>
+        const cursesData = {
+            "Curse of the Labyrinth": { cardTitle: "ANSWER A RIDDLE AT A STATION", description: "Casper has recorded a riddle for you to answer. You are permitted one guess. If you are wrong, this card is vetoed. \n\nYou must answer the riddle in a station, off transit. Once off transit, you cannot leave or board any form of transit until you have attempted an answer.", reward: 0},
+            "Curse of the Right Turn": { cardTitle: "ESTIMATE YOUR DISTRICT’S POPULATION", description: "You get one guess. You must be within 20% of the right answer or you automatically veto this challenge.\n\nIn this context, city means municipality.\n\nYou cannot use your phone, the internet, or ask anyone for help.", reward: 90 },
+            "Curse of the Endless Tumble": { cardTitle: "CONGRATULATIONS! YOU’RE IN CASPER’S TRIVIA CORNER", description: "Casper has recorded three trivia questions about Japan(as I suppose you guys have similar , with increasing levels of difficulty.\n\nYou have one guess at each answer. For each right answer, you receive 40 coins.\n\nThere is no punishment for wrong answers in Casper’s trivia corner, that's not how Amy rolls(Purposely not Casper).", reward: "0-120" },
+            "Curse of the Hidden Hangman": { cardTitle: "MAKE A THROW", description: "Throw anything at a rubbish bin from a distance of 8 meters.\n\nThe rubbish bin cannot be a dumpster.\n\nYou may spend as long as you wish setting up items to aid its throw.\n\nYou get one attempt, If you fail, the challenge is automatically vetoed.\n\nYou must get full footage on doing it.", reward: 90 },
+            "Curse of the Distance Cuisine": { cardTitle: "EAT CHEAP", description: "Eat some food costs less than $10. That food must be bought after you pulled this card using the $60 budget.\n\nYou must keep the receipt for that.", reward: 60 },
+            "Curse of the Bird Guide": { cardTitle: "TAKE A PICTURE OF A FANCY CAR", description: "The car must have a sticker price of more than $1M.\n\nIt can be a real car, or a depiction of it.\n\nThe car must not be a public transport.", reward: 90 },
+            "Curse of the Bridge Troll": { cardTitle: "GET ON A TRAIN IMMEDIATELY", description: "You must be on a moving train in the next 10 minutes.\n\nIf you are not on a moving train in the next 10 minutes, this card is vetoed.\n\nOnly in this challenge, light rails and trams are counted as trains.", reward: 90 },
+            "Curse of the Cairn": { cardTitle: "GO EXACTLY 1.6 KILOMETERS", description: "You must be on a moving train in the next 10 minutes.\n\nIf you are not on a moving train in the next 10 minutes, this card is vetoed.\n\nOnly in this challenge, light rails and trams are counted as trains.", reward: 75 },
+            "Curse of the Jammed Door": { cardTitle: "GET 400 METERS FROM A SKYSCRAPER", description: "A skyscraper is defined as any man-made structure large enough and capable of fitting people inside of it and has at least 3 floors.\n\nYou must either be able to see 400 meters in all directions or search thoroughly enough to prove there are no skyscrapers.\n\nThis cannot be claimed while in motion.", reward: 150 },
+            "Curse of the Impressionable Consumer": { cardTitle: "HIDE AND SEEK", description: "Alert the chasers as soon as you pull this card.\n\nChoose a building within 2 miles of where you are now. Send the chasers its address, turn off your tracker, and then find a hiding place. Once you have chosen a hiding place, you may not move until you are caught or you claim the card.\n\nThe chasers have 15 mins from the time you turn off your tracker to find you.\nIf you last 15 mins, the card is claimed. You may wait up to 5 mins before turning your tracker back on.", reward: 150 },
+            "Curse of the Spotty Memory": { cardTitle: "HIDE YOUR CARMEL ID AND LEAVE", description: "You must place your personal Carmel Secondary School student ID down in a publicly-accessible location. It does not need to be visible. Travel at least 400 meters away from your student ID before you return to retrieve it.\n\nIf the card is stolen, I mean you don’t need it anymore.\n\nYou must get full footage on doing it.", reward: 90 },
+            "Curse of the Luxury Car": { cardTitle: "USE A FANCY RESTROOM", description: "Use the restroom of a hotel that costs more than $1000 that night.\n\nYou must actually use the restroom.\n\nYou must take a picture at the front of the restroom you used", reward: 75 },
+            "Curse of the Drained Brain": { cardTitle: "VISIT THE TOP ATTRACTION", description: "Determine the #1 attraction on TripAdvisor within 2 kilometers and get within 150 meters of it.\n\nYou do not need to gain admittance to the attraction.\n\nList, on camera, the top five things you love about it.", reward: 75 },
+            "Curse of the Urban Explorer": { cardTitle: "SEND AN ANONYMOUS THREAT", description: "Using a device that is not yours, and an email that is not yours, send a threatening email to one of the chasers.\n\nYou may not ask anyone to use their advice.", reward: 75 },
+            "Curse of the Zoologist": { cardTitle: "SING CLASSICAL MUSIC", description: "Sing or hum a classical song to soundhound well enough that it recognizes what you are singing.\n\n To choose a song, ask Casper for the YouTube video, then generate a random number between 1 and 50 and choose the corresponding song off of the provided video.\n\nYou must get full footage on doing it.", reward: 50 },
+            "Curse of Water Weight": { cardTitle: "EAT, PRAY, LOVE, BUT UR JUST GAY", description: "In the following order, you must:\n\n•Do not eat an entire slice of pizza.\n\n•Do not visit any site of religious worship (you do not have to enter, but you must stand directly outside the building.)\n\n•Call the chasers and tell them how much you love and respect them for at least 30 seconds. If they do not pick up, you may text them instead.", reward: 75 },
+            "Curse of the Lemon Phylactery": { cardTitle: "ESTIMATE THE SIZE OF A BLOCK", description: "Pick a block and estimate the length of its perimeter. You may not use any measuring instruments while making your estimation.\n\nOnce you locked in an answer, measure the perimeter (or if the correct answer exists in the public record, look it up.) If you are more than 15% off, this challenge is automatically vetoed.", reward: 90 },
+            "Curse of the Egg Partner": { cardTitle: "CAFFEINE YOURSELF", description: "Obtain a can or a bottle of coffee less than $15 using the $60 budget. Take a sip of it.\n\nYou can choose if you are finishing it or not.", reward: 60 },
+            "Curse of the Ransom Note": { cardTitle: "DATE AN OLD THING", description: "Find an old structure. You have one guess to accurately predict which century it was built in.\n\nYou may not use your phone or any concrete information concerning it's construction date. You must make this guess using contextual clues.\n\nIf your guess is wrong, you cannot find a reliable date of construction or if your building was constructed during the 20th or 21st century, this challenge is automatically vetoed.", reward: 100 },
+            "Curse of the U Turn": { cardTitle: "GET LUCKY ON COIN FLIP", description: "Get a coin to land heads up seven times in a row.\n\nYou must get full footage on doing it.", reward: 90 },
+            "Curse of the Unguided Tourist": { cardTitle: "GUESSTIMATE A KILOMETER", description: "Starting from this place you were when you pulled this card, without measuring, get as close to one kilometer away as you can (measured as the crow flies) You must be right within 30%.\n\nIf you fail, you may not reattempt.\n\nApart from a timer/watch, you may not consult your phone, maps, or any other tools before completing or vetoing this challenge.", reward: 100 },
+            "Curse of the Mediocre Travel Agent": { cardTitle: "BE A FOREIGNER", description: "Go to a cafe (or any counter-service establishment) and order something less than $20 using the $60 budget. At no point can the server speak to you in Cantonese. If they speak to you in Cantonese, you automatically veto this challenge.\n\nThe challenge is completed when you receive your item and leave the cafe.\n\nYou must get full footage on doing it.", reward: 80 },
+            "Curse of the Gilded Inquiry": { cardTitle: "CREATE A DISPUTATION ON CARMEL SECONDARY SCHOOL", description: "Write down 50 of your opinions in English on your phone. The average word count of your opinions must be at least 5.\n\nEach option must be unique and distinct from all previous opinions.\n\nPublicly reading all opinions.\n\nYou must get full footage on doing it.", reward: 100 },
+            "Curse of the Impenetrable Fog": { cardTitle: "DISTINGUISH ACCENTS", description: "Listen to Casper's voice messages, in which a given Japanese phrase is read by a Chinese person, an English person, a Canadian person, and a German person. Then, you must successfully match each video with the correct country of origin.\n\nIf you get any matches wrong, this card is automatically vetoed.", reward: 90 },
+            "Curse of the Long Shot": { cardTitle: "TAKE TO THE SKIES", description: "Acquire or construct an object that you will send into the sky. You may practice, but you have one official chance to \"launch\" said object, and cannot interfere with it while it is airborne.\n\nYou must make a prediction for how long it will stay in the air, and coins are earned based on your prediction duration (not actual duration.) If your object flies for less than your prediction or hits a human during its flight, this card is automatically vetoed.\n\nYou may get $10 from the budget if you need that.\n\nYou must get full footage on doing it.", reward: "10 per second" },
+            "Curse of the Shrewd Critic": { cardTitle: "FIND THE MYSTERY OBJECT", description: "Casper is thinking of an object. Check Casper’'s hint about what the mystery object is.\nYou may now position yourself anywhere you like. Then, reveal what the mystery object is. You have five minutes to find it. If you fail to find it, this card is automatically vetoed.", reward: 90 },
+            "Curse of the Archaeologist": { cardTitle: "INVENT, THEN FIND, A PERSON", description: "Randomly generate a person by flipping a coin for each of these characteristics:\n\n1. Shorts or pants?\n\n2. Short sleeves or long?\n\n3. Hat or no hat?\n\n4. Bag or no bag?\n\n5. Glasses or no glasses?\n\nFind this person out in the world. It cannot be you or your teammate.", reward: 90 },
+
+            "Curse of the Rewind": { cardTitle: "CURSED!", description: "For the next 20 mins, you are strictly banned from using e-payment for transportation.\n\nIf you are going to ride an MTR, you can claim the difference for an adult ticket from the $60 money pool.\n\nUnless vetoed, this card is claimed immediately.", reward: 100 },
+            "Curse of the Passenger Princess": { cardTitle: "CURSED!", description: "Your phone is dead. For the rest of your run, you cannot use your phone for navigation or research.\n\nYou may use your phone if a challenge specifies its use (i.e to take a photo or something) or to communicate with the chasers.", reward: 200 },
+            "Curse of the Hide-And-Seek-Ception": { cardTitle: "CURSED!", description: "Roll a die. If you roll an odd number, you must board a train on an odd-numbered platform at your nearest station, and vice versa for an even number.\n\nIf you roll a 1 or 2, you must board the first train on the departure board when you arrive at the platform. Board the second train for a 3 or 4, and the third train for a 5 or 6.\n\nUnless vetoed, this card is claimed immediately.", reward: 80 },
+            "Curse of the Zipped Lip": { cardTitle: "CURSED!", description: "For the rest of your run, veto periods last three times longer.", reward: 150 },
+            "Curse of the Queue": { cardTitle: "CURSED!", description: "For the next 20 mins, you are strictly banned from entering the paid zone of MTR.\n\nUnless vetoed, this card is claimed immediately.", reward: 120 },
+            "Curse of the Pong Champion": { cardTitle: "CURSED!", description: "The name of the next MTR station that you disembark for 10 mins in must be 2 chinese letters long. Or, the name of the next bus station that you disembark in cannot be longer than 6 chinese letters \n\nUnless vetoed, this card is claimed immediately.", reward: 75 },
+            "Curse of the Express Route": { cardTitle: "CURSED!", description: "Data leak! For the next 1 hours, you must provide the chasers with all the following information:\n\n- Purchased transport\n\n- Pulled cards\n\n- Outcome of challenges\n\n- Coin balance", reward: 90 },
+            "Curse of the Soothsayer": { cardTitle: "CURSED!", description: "For the rest of your run, you may only take transportation that leaves at odd-numbered times.\n\nThis is based on the last digit of scheduled departure time", reward: 150 },
+            "Curse of the Tiny Home": { cardTitle: "CURSED!", description: "You are now a knight. You may only walk or run in the pattern of a knight. For every three steps forward you take, you must take one step to the side.\n\nYou will remain a knight until you go to a hospital. Anything Google Maps classifies as a hospital counts.", reward: 100 }
+        };
+
+        const listView = document.getElementById('list-view');
+        const cardView = document.getElementById('card-view');
+        const buttonListContainer = document.getElementById('button-list');
+        const confirmModal = document.getElementById('confirm-modal');
+        const confirmMessage = document.getElementById('confirm-message');
+        const btnConfirm = document.getElementById('btn-confirm');
+        const btnCancel = document.getElementById('btn-cancel');
+        const btnBack = document.getElementById('btn-back');
+        const searchInput = document.getElementById('search-input');
+
+        const cardTitleEl = document.getElementById('card-content-title');
+        const cardDescEl = document.getElementById('card-content-desc');
+        const cardRewardEl = document.getElementById('card-content-reward');
+
+        let selectedCurseKey = null;
+
+        // Function to extract sorting key based on words following 'the' or 'of'
+        function getSortKey(title) {
+            const lower = title.toLowerCase();
+            if (lower.includes(' the ')) {
+                return lower.substring(lower.indexOf(' the ') + 5).trim();
+            }
+            if (lower.includes(' of ')) {
+                return lower.substring(lower.indexOf(' of ') + 4).trim();
+            }
+            if (lower.startsWith('curse ')) {
+                return lower.replace(/^curse\s+/, '').trim();
+            }
+            return lower;
+        }
+
+        // Get sorted keys based on the custom sort key
+        const sortedCurseKeys = Object.keys(cursesData).sort((a, b) => {
+            const keyA = getSortKey(a);
+            const keyB = getSortKey(b);
+            return keyA.localeCompare(keyB);
+        });
+
+        function renderList(filterText = '') {
+            buttonListContainer.innerHTML = '';
+            const lowerFilterText = filterText.toLowerCase();
+
+            sortedCurseKeys.forEach(curseKey => {
+                if (curseKey.toLowerCase().includes(lowerFilterText)) {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full text-left px-4 py-3.5 bg-zinc-800/90 border border-zinc-700/80 rounded-xl shadow-sm hover:bg-zinc-700 hover:border-zinc-500 active:scale-[0.99] transition-all text-base font-medium text-zinc-100 flex justify-between items-center group';
+                    btn.innerHTML = `
+                        <span>${curseKey}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-zinc-500 group-hover:text-zinc-300 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    `;
+                    btn.onclick = () => showConfirmModal(curseKey);
+                    buttonListContainer.appendChild(btn);
+                }
+            });
+
+            if (buttonListContainer.children.length === 0) {
+                 const noResults = document.createElement('div');
+                 noResults.className = 'text-center text-zinc-500 py-8 text-sm';
+                 noResults.textContent = 'No curses found matching your search.';
+                 buttonListContainer.appendChild(noResults);
+            }
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            renderList(e.target.value);
+        });
+
+        function showConfirmModal(curseKey) {
+            selectedCurseKey = curseKey;
+            confirmMessage.textContent = `Confirm you have pulled the "${curseKey}"?`;
+            confirmModal.classList.remove('hidden');
+        }
+
+        function hideConfirmModal() {
+            confirmModal.classList.add('hidden');
+            selectedCurseKey = null;
+        }
+
+        function showCard() {
+            if (!selectedCurseKey || !cursesData[selectedCurseKey]) return;
+
+            const data = cursesData[selectedCurseKey];
+            
+            cardTitleEl.textContent = data.cardTitle;
+            cardDescEl.textContent = data.description;
+            cardRewardEl.textContent = `REWARD: ${data.reward}`;
+
+            hideConfirmModal();
+            cardView.classList.remove('hidden');
+        }
+
+        function showList() {
+            cardView.classList.add('hidden');
+            selectedCurseKey = null;
+        }
+
+        btnCancel.addEventListener('click', hideConfirmModal);
+        btnConfirm.addEventListener('click', showCard);
+        btnBack.addEventListener('click', showList);
+
+        renderList();
+    </script>
+</body>
+</html>
